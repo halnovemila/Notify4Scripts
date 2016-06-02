@@ -4,27 +4,42 @@ Sort of wrapper app that allow to call the notification service and build a noti
 Notify4Scripts has two service classes: NotifyService and NotifyServiceCV
 The difference among the two is that NotifyServiceCV supports CustomView notifications and a number of parameters to customize the notification, while NotifyService only support standard basic notification.
 
-Parameters that can be passed to NotifyServiceCV are:
+PARAMETERS that can be passed to NotifyServiceCV are:
 str_ticker // Optional. text to be displayed on the notification ticker. If not set it will defaul to "Notify4Scripts ticker"
            // and the notification sound will be played. If set to "" the ticker won't be displayed and no notification
            // sound will be played
+
 str_title // Optional. text to be displayed as notification title.
           //If not set it will default to "Notify4Scripts Notification Title"
+
 str_content // Optional. text to be displayed as notification content.
            //If not set it will default to "Notify4Scripts Notification Content"
+
 int_id // Optional. number that identify the notification
+
 hex_tcolor // Optional. Color of title text. Format must be RGB Hex without hash (for example 85b8ff)
+
 hex_ccolor // Optional. Color of content text.  Format must be RGB Hex without hash (for example 85b8ff)
+
 float_tsize // Optional. Size of title text in dpi. Format must be float (for example 18.5)
+
 float_csize // Optional. Size of content text in dpi. Format must be float (for example 18.5)
+
 b_noicon // Optional. If se to "1" no icon will be displayed inside the notification box
+
 b_notime // Optional. If se to "1" no time will be displayed inside the notification box
+
 str_viewuri //Optional. Set a URI as View intent of the notification.
             //The URI will be "displayed" by touching the notification 
+
 str_exec //Optional. Set the commands that will be executed  by touching the notification. See examples below
+
 b_execdebug // Optional. If set to "1" debig messages will be sent to Log service.
+
 str_staticonuri // NOT WORKING YET. A URI to a drawable resource that will be used as notification icon on status bar
+
 str_iconuri // NOT WORKING YET. A URI to a drawable resource that will be used as notification icon on notification box
+
 int_iconid // Optional. Set the notification icon based on the id number of the available drawable icon resources
            // in the app package. Id must be a integer number on the range 0 to 6 as there are 7 drawable available.
            
