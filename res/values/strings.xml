@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, Notify4Scripts!</string>
+    <string name="app_name">Notify 4Scripts</string>
+    <string name="notification_image_descritpion">Image used in notification content</string>
+    <string-array name="stat_ic_array">
+        <item>stat_ic_color</item>
+        <item>stat_ic_holo_dark</item>
+        <item>stat_ic_white</item>
+        <item>stat_ic_holo_light</item>
+        <item>stat_ic_black</item>
+        <item>ic_stat_notification</item>
+        <item>android:drawable/stat_notify_error</item>
+        <item>android:drawable/stat_notify_disk_full</item>
+        <item>android.resource://jackpal.androidterm/drawable/ic_stat_service_notification_icon</item>
+	</string-array>
+</resources>
