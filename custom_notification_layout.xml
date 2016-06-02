@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/MainRelativeLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingLeft="5dp"
+    android:paddingTop="1dp" >
+
+        <TextView
+            android:id="@+id/notification_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/notification_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/notification_title"
+            android:bufferType="spannable"
+            android:fadingEdge="vertical" />
+
+        <TextView
+            android:id="@+id/notification_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/notification_image"
+            android:layout_toLeftOf="@id/notification_image" />
+
+        <TextView
+            android:id="@+id/dummy_textview"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_alignParentRight="true" />
+
+        <ImageView
+            android:id="@+id/notification_image"
+            android:layout_width="25dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="2dp" 
+            android:adjustViewBounds="true"
+            android:layout_toLeftOf="@id/dummy_textview" 
+            android:contentDescription="@string/notification_image_descritpion"
+            android:src="@drawable/notify4scripts_icon" />
+
+</RelativeLayout>
+
