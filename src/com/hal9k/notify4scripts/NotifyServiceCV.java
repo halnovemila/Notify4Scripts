@@ -26,8 +26,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.content.res.XmlResourceParser;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.app.IntentService;
 
@@ -63,8 +68,11 @@ public class NotifyServiceCV extends IntentService {
 		String str_staticonuri = null;
 		String str_iconuri = null;
 		String int_iconid = null;
+		String b_autocancel = null;
+		String int_cancel = null;
 		short ID4icon = 0;
 		int ID4notify = 0;
+		boolean autocancelflag = false;
 		
 		RemoteViews customContentView = new RemoteViews(getPackageName(), R.layout.custom_notification_layout);
 		
@@ -86,6 +94,8 @@ public class NotifyServiceCV extends IntentService {
 			str_staticonuri = intent.getStringExtra("str_staticonuri");
 			str_iconuri = intent.getStringExtra("str_iconuri");
 			int_iconid = intent.getStringExtra("int_iconid");
+			b_autocancel = intent.getStringExtra("b_autocancel");
+			int_cancel = intent.getStringExtra("int_cancel");
 		}
 
 		if (null == str_ticker) {
@@ -109,6 +119,17 @@ public class NotifyServiceCV extends IntentService {
 			catch(NumberFormatException ex) {
 				// Handle the condition when str is not a number.
 				Log.d("Notify4Scripts - ID4notify","catched NumberFormatException for int_id = "+ int_id);
+			}
+		}
+	
+		if (null != int_cancel) {
+			ID4notify = 0; //this is to prevent that a non zero value might be set by int_id extra
+			try {
+				ID4notify = Integer.parseInt(int_cancel);
+			}
+			catch(NumberFormatException ex) {
+				// Handle the condition when str is not a number.
+				Log.d("Notify4Scripts - ID4notify","catched NumberFormatException for int_cancel = "+ int_cancel);
 			}
 		}
 	
@@ -187,6 +208,7 @@ public class NotifyServiceCV extends IntentService {
 			customContentView.setViewVisibility(R.id.notification_image, View.GONE); b_customview = "1";}
 		if ("1".equals(b_notime)) {
 			customContentView.setViewVisibility(R.id.notification_time, View.GONE); b_customview = "1";}
+		if ("1".equals(b_autocancel)) { autocancelflag = true;}
 	
 		/* The following code join both str_title and str_content in one spannable string
 		 * where the str_title portion is set to bold style
@@ -258,33 +280,58 @@ public class NotifyServiceCV extends IntentService {
 	
 		int drawableId = getResources().getIdentifier(stat_icons[ID4icon].contains(":") ? stat_icons[ID4icon] : this.getPackageName()+":drawable/"+stat_icons[ID4icon], null, null);
 
+		Log.d("Notify4Scripts - Uri.parse",stat_icons[ID4icon].contains(":") ? stat_icons[ID4icon] : "android.resource://"+this.getPackageName()+"/drawable/"+stat_icons[ID4icon]);
+		Uri uri = Uri.parse(stat_icons[ID4icon].contains(":") ? stat_icons[ID4icon] : "android.resource://"+this.getPackageName()+"/drawable/"+stat_icons[ID4icon]);
+		customContentView.setImageViewUri(R.id.notification_image, uri);
+				
+		// customContentView.setImageViewBitmap(R.id.notification_image,drawableToBitmap((BitmapDrawable) Drawable.createFromPath(uri.getPath())));
+		
 		if (drawableId == 0 ) {
 			drawableId = getResources().getIdentifier(this.getPackageName()+":drawable/"+stat_icons[0], null, null);
 			Log.d("Notify4Scripts - int_iconid","no drawable resource found for int_iconid = "+ int_iconid + "; resource = "+stat_icons[ID4icon]);
 		}
 
+		/*int mDrawableResID = 0;
 
-		getPackageResources("jackpal.androidterm");
+		try {
+			mDrawableResID = getPackageManager().getResourcesForApplication("jackpal.androidterm").getIdentifier("ic_stat_service_notification_icon", "drawable","jackpal.androidterm");
+		} catch (NameNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+		drawableId = mDrawableResID;
 		
+		if (drawableId == 0 ) {
+			drawableId = getResources().getIdentifier(this.getPackageName()+":drawable/"+stat_icons[0], null, null);
+			Log.d("Notify4Scripts - int_iconid","no drawable resource found for int_iconid = "+ int_iconid + "; resource = "+stat_icons[ID4icon]);
+		}
+		*/
+
+		/*
 		try {
 	        PackageManager manager = getPackageManager();
 	        Resources mApk1Resources = manager.getResourcesForApplication("jackpal.androidterm");
 
-	        int mDrawableResID = mApk1Resources.getIdentifier("ic_launcher", "drawable","jackpal.androidterm");
+	        int mDrawableResID = mApk1Resources.getIdentifier("ic_stat_service_notification_icon", "drawable","jackpal.androidterm");
 
 	        Drawable myDrawable = mApk1Resources.getDrawable( mDrawableResID );
 
-	        if( myDrawable != null )
-				Log.d("Notify4Scripts - int_iconid","no drawable resource found in jackpal.androidterm package");
+	        if( myDrawable != null ) {
+				Log.d("Notify4Scripts - int_iconid","drawable resource found in jackpal.androidterm package");
+				customContentView.setImageViewBitmap(R.id.notification_image,drawableToBitmap (myDrawable));
+	        } else {
+			customContentView.setImageViewResource(R.id.notification_image, drawableId);
+	        }
 
 	    }
 	    catch (NameNotFoundException e) {
 			Log.d("Notify4Scripts - int_iconid","NameNotFoundException in jackpal.androidterm package");
+			customContentView.setImageViewResource(R.id.notification_image, drawableId);
 	    }
+		*/
 
 		
-		customContentView.setImageViewResource(R.id.notification_image, drawableId);
-                 
 		customContentView.setTextViewText(R.id.notification_title,str_title.replace("\\n", "\n"));
 		customContentView.setTextColor(R.id.notification_title, mNotifyTitleColor);
 		customContentView.setFloat(R.id.notification_title, "setTextSize", mNotifyTitleSize);
@@ -334,7 +381,7 @@ public class NotifyServiceCV extends IntentService {
 		 *    Solution found here: http://stackoverflow.com/questions/3009059/android-pending-intent-notification-problem
 		 *    Thanks to user CommonsWare http://stackoverflow.com/users/115145/commonsware
 		 */
-        notificationIntent.setType(int_id); 
+        notificationIntent.setType("text/plain"); 
 		
 		contentIntent = PendingIntent.getService(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
@@ -348,11 +395,11 @@ public class NotifyServiceCV extends IntentService {
 		.setTicker(str_ticker)
 		// Icon to be set on Notification
 		.setSmallIcon(drawableId)
-
+		
 		// This flag will make it so the notification is automatically
 		// canceled when the user clicks it in the panel.
-		//.setAutoCancel(true)
-		
+		.setAutoCancel(autocancelflag)
+
 		/* No action will be performed when notification is clicked
 		 * so no intent is needed and the following lines are commented out
 		 *
@@ -379,8 +426,11 @@ public class NotifyServiceCV extends IntentService {
 		//notification.flags |= Notification.FLAG_ONLY_ALERT_ONCE;
 		
 		manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		manager.notify(ID4notify, notification);
-
+		if (null != int_cancel) {
+			manager.cancel(ID4notify);}
+		else {
+			manager.notify(ID4notify, notification);
+        }
 	}
 	
 	/* The following code is been found first on http://stackoverflow.com/questions/4867338/custom-notification-layouts-and-text-colors
@@ -471,6 +521,21 @@ public class NotifyServiceCV extends IntentService {
         return false;
     }
  
+
+    /* code for enumerating the resources of a package using reflection
+    * found here http://stackoverflow.com/questions/20211144/way-to-accessing-resources-and-resource-ids-of-other-apps
+    * posted by user xilosada http://stackoverflow.com/users/844456/xilosada
+    *
+    * The original code hits IllegalArgumentException throwed by method Field.getInt(Object)
+    * at line with int id = field.getInt(resourceType);
+    * for resource type packageName + ".R" + "$styleable"
+    * that is the 1st encountered on the array from externalR.getDeclaredClasses()
+    * so the "for" loop is immediately broken and no other resource is processed.
+    * 
+    * I fixed the code adding a "try" and "catch" that include the line that calls
+    * the get.Int method
+    */
+    /*
     private void getPackageResources(String packageName) {
         String resourcesClassName = packageName + ".R";
         String drawableClassName = resourcesClassName + "$drawable";
@@ -487,28 +552,52 @@ public class NotifyServiceCV extends IntentService {
             for(Class<?> resourceType : resourceTypes ){
                 Log.d("RESOURCE TYPE 4s", resourceType.getName());
                 for(Field field :  resourceType.getFields()){
-                    Log.d("Field Name 4s", field.getName());
-                    int id = field.getInt(resourceType);
-                    Log.d("id 4s", String.valueOf(id));
-                    if(resourceType.getName().equals(stringClassName)){
-                        String string = resources.getString(id);
-                        Log.d("value 4s", string);
-                    }else if(resourceType.getName().equals(drawableClassName)){
-                        Drawable drawable = resources.getDrawable(id);
-                    }else if(resourceType.getName().equals(layoutClassName)){
-                        XmlResourceParser layout = resources.getLayout(id);
+                    //Log.d("Field Name 4s", field.getName());
+                    try {
+                    	int id = field.getInt(resourceType);
+                    	//Log.d("4s id for field = "+field.getName(), String.valueOf(id));
+                    	if(resourceType.getName().equals(stringClassName)){
+                    	//    String string = resources.getString(id);
+                    	//    Log.d("value 4s", string);
+                    	}
+                    	// drawableClassName = packageName + ".R" + "$drawable"
+                    	else if(resourceType.getName().equals(drawableClassName)){
+                    		Drawable drawable = resources.getDrawable(id);
+                        	Log.d("4s id for field = "+field.getName(), String.valueOf(id));
+           					Log.d("4s Drawable value", drawable.toString());
+                    	}else if(resourceType.getName().equals(layoutClassName)){
+                    	//    XmlResourceParser layout = resources.getLayout(id);
+                    	//	Log.d("Layout value 4s", layout.toString());
+                    	}
+                    } catch (IllegalArgumentException e) {
+                     	Log.d("id 4s", "catched IllegalArgumentException");
                     }
                 }
             }
         } catch (NameNotFoundException e) {
-            e.printStackTrace();
+        	Log.d("otherAppContext 4s", "catched NameNotFoundException");
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        	Log.d("otherAppContext 4s", "catched ClassNotFoundException");
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        	Log.d("id 4s", "catched IllegalAccessException");
         } 
     }
+    */
     
+    
+    // code to convert a drawable to a bitmap found here http://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
+    // thanks to user Andrè http://stackoverflow.com/users/259237/andr%c3%a9
+   
+    public static Bitmap drawableToBitmap (Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable)drawable).getBitmap();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap); 
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
+    }    
 }
